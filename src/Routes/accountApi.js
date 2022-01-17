@@ -39,16 +39,4 @@ AccountApiRouter.get('/account/:id', verifyToken, (req, res) => {
   accountController.getAccount(req);
 });
 
-
-// get all followers and followings of a user/creator
-AccountApiRouter.get('/follow-info/@:userName', verifyToken, (req, res) => {
-  const accountController = new AccountController(res);
-  accountController.getFollowInfo(req);
-});
-
-// AccountApiRouter.post('/account/:username/follow', verifyToken, (req, res) => {
-//   const accountController = new AccountController(res);
-//   accountController.followAccount(req);
-// })
-
 export default AccountApiRouter;
