@@ -102,15 +102,16 @@ export default class AccountService {
       throw new Exceptions.NotFoundException('User not found');
     }
 
-    return {
-      id: account.id,
-      email: account.email,
-      userName: account.userName,
-      followers: account.follower,
-      followings: account.following,
-      followersCount: account.follower.length,
-      followingsCount: account.following.length,
-    }
+    return account;
+    // return {
+    //   id: account.id,
+    //   email: account.email,
+    //   userName: account.userName,
+    //   followers: account.follower,
+    //   followings: account.following,
+    //   followersCount: account.follower.length,
+    //   followingsCount: account.following.length,
+    // }
   }
 
   /**

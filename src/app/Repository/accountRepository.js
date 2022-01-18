@@ -1,4 +1,4 @@
-const { User, sequelize } = require('../../models');
+const { User, sequelize, Sequelize } = require('../../models');
 import jwt from 'jsonwebtoken';
 const { Op } = require('sequelize');
 
@@ -78,15 +78,20 @@ export default class AccountRepository {
   }
 
   async getAccountDetails(id) {
+    const followeeIdCol = '"following->UserFollow"."followeeId"';
+    const followerIdCol = '"follower->UserFollow"."followerId"';
+    const userIdCol = '"User"."id"';
     const user = await User.findOne({
       where: {
         id,
       },
-      // includeIgnoreAttributes : false,
+      includeIgnoreAttributes : false,
       attributes: [
         'id',
         'userName',
         'email',
+        [Sequelize.literal(`COUNT(${followeeIdCol}) OVER (PARTITION BY ${userIdCol}, ${followerIdCol})`), 'followingCount'],
+        [Sequelize.literal(`COUNT(${followerIdCol}) OVER (PARTITION BY ${userIdCol}, ${followeeIdCol})`), 'followerCount'],
       ],
       include: [
         {
@@ -106,7 +111,7 @@ export default class AccountRepository {
           }
         }
       ],
-      distinct : true,
+      // distinct : true,
     });
 
     return user;
