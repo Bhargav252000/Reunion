@@ -174,30 +174,22 @@ export default class PostService {
     const { id } = request.params;
 
     const details = await this.postRepository.getPostDetails(id);
-    
+
     const { comments, likes, title, description, createdAt } = details;
-    
+
     if (!details) {
       throw new Exceptions.NotFoundException('Post not found/No details found');
     }
 
-    return {
-      success: true,
-      id: details.id,
-      title,
-      description,
-      createdAt,
-      likes: likes.length,
-      comments,
-    };
+    return details;
   }
 
   async getAllPosts(request) {
     const { userId } = request.user;
 
     const posts = await this.postRepository.getAllPosts(userId);
-    
-    if(!posts) {
+
+    if (!posts) {
       throw new Exceptions.NotFoundException('No posts found');
     }
 

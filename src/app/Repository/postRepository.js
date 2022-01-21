@@ -46,13 +46,24 @@ export default class PostRepository {
    * get the post details with all the comments and number of likes on the post
    */
   async getPostDetails(postid) {
+    const postsIdCol = '"likes->PostLikes"."postId"';
+    const postCol = '"Post"."id"';
+    const commentCol = '"comments"."id"';
+
     const response = await Post.findOne({
       where: {
         id: postid,
       },
+      // includeIgnoreAttributes : false,
       attributes: [
-        'id', 'title', 'description', 'createdAt', 
-        // [sequelize.literal(`(SELECT COUNT(*) FROM "PostLikes" as "likes" WHERE "likes"."postId" = ${postid});`), 'likesCount'],
+        'id',
+        'title',
+        'description',
+        'createdAt',
+        [
+          sequelize.literal(`COUNT(${postsIdCol}) OVER (PARTITION BY ${postCol}, ${commentCol} )`),
+          'likesCount',
+        ],
       ],
       include: [
         {
@@ -67,9 +78,9 @@ export default class PostRepository {
             attributes: [],
           },
           attributes: ['id', 'userName', 'email'],
-          duplicating: false,
         },
       ],
+      distinct: true,
     });
     return response;
   }
@@ -78,16 +89,37 @@ export default class PostRepository {
    * get all the posts with there comments
    */
   async getAllPosts(userId) {
+    const postsIdCol = '"likes->PostLikes"."postId"';
+    const postCol = '"Post"."id"';
+    const commentCol = '"comments"."id"';
+
     const posts = await Post.findAll({
       where: {
         userId,
       },
-      attributes: ['id', 'title', 'description', 'createdAt'],
+      attributes: [
+        'id',
+        'title',
+        'description',
+        'createdAt',
+        [
+          sequelize.literal(`COUNT(${postsIdCol}) OVER (PARTITION BY ${postCol}, ${commentCol} )`),
+          'likesCount',
+        ],
+      ],
       include: [
         {
           model: Comment,
           as: 'comments',
           attributes: ['id', 'content', 'createdAt', 'updatedAt'],
+        },
+        {
+          model: User,
+          as: 'likes',
+          through: {
+            attributes: [],
+          },
+          attributes: ['id', 'userName', 'email'],
         },
       ],
     });
